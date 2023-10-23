@@ -1,0 +1,25 @@
+- name: Install the newest version of package "bind9"
+  ansible.builtin.apt:
+    name: bind9
+    state: present
+
+- name: Copy file with owner and permission of named.conf.options for bind9 service
+  ansible.builtin.template:
+    src: named.conf.{{ item }}.j2
+    dest: /etc/bind/named.conf.{{ item }}
+  loop:
+    - options
+    - local
+  notify: "restart bind9 service"
+
+- name: start bind9 service
+  ansible.builtin.service:
+    name: bind9
+    state: started
+    enabled: true
+
+- name: Copy file with o cybera.mk for bind9 service
+  ansible.builtin.template:
+    src: zone.j2
+    dest: /var/lib/bind/db.cybera.mk
+  notify: "rndc reload"
